@@ -1,0 +1,15 @@
+:root {
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
+}
+
+[data-bs-theme="dark"] {
+  --bg-color: #212529;
+  --text-color: #f8f9fa;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.2s, color 0.2s;
+}
