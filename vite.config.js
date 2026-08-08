@@ -6,15 +6,6 @@ export default defineConfig({
   plugins: [
     react(),
   ],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'https://api.webify.host',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  },
   test: {
     globals: true,
     environment: 'jsdom',
