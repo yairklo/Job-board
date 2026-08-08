@@ -1,17 +1,18 @@
 # React Job Board Application
 
-A full-featured, production-ready Job Board Application built with React, Vite, and Tailwind CSS.
+A full-featured, production-ready Job Board Application built with React, Vite, and Bootstrap.
 
 ## 🚀 Objectives & Features
 
 This application serves two primary user personas:
 - **Job Seekers**: Browse, filter, view details, and save jobs to their personal list.
-- **Recruiters/Admins**: Create, edit, and delete job postings, manage user status, and view application data.
+- **Recruiters**: Create, edit, and delete their own job postings, and view applicants.
+- **Admins**: Have overarching control to edit and delete any job postings across the platform and manage user statuses.
 
 ### Key Features
 - **Role-Based Access Control**: Secure routing for Guests, Authenticated Users, Recruiters, and Admins.
 - **Dynamic Search & Filtering**: Real-time filtering with 300ms debounce.
-- **Premium Design**: Fully responsive, dark-mode ready UI built with Tailwind CSS.
+- **Premium Design**: Fully responsive, dark-mode ready UI built with Bootstrap.
 - **Form Validation**: Robust client-side validation using Formik and Yup.
 - **API Integration**: Centralized Axios instance with request interceptors for JWT auth.
 
@@ -24,8 +25,9 @@ This application serves two primary user personas:
 - **Form Handling & Validation**: `formik` + `yup`
 - **UI Notifications**: `react-toastify`
 - **State Management**: React Context API (`AuthContext`, `ThemeContext`)
-- **Styling**: Tailwind CSS v4
+- **Styling**: Bootstrap
 - **Icons**: `react-icons`
+- **Testing**: `vitest` + `@testing-library/react`
 
 ## 📁 Folder Architecture
 
@@ -94,3 +96,6 @@ VITE_API_URL=https://api.webify.host
    ```bash
    npm run preview
    ```
+
+---
+**Submitted by:** Yair Klausner
