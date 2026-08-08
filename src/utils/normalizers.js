@@ -13,8 +13,8 @@ export const normalizeUser = (userData) => {
       country: userData.address?.country,
       city: userData.address?.city,
       street: userData.address?.street,
-      houseNumber: userData.address?.houseNumber,
-      zip: userData.address?.zip || 0,
+      houseNumber: Number(userData.address?.houseNumber),
+      zip: Number(userData.address?.zip) || 0,
     },
     image: {
       url: userData.image?.url || '',
@@ -33,16 +33,16 @@ export const normalizeJob = (jobData) => {
     location: jobData.location,
     jobType: jobData.jobType,
     experienceLevel: jobData.experienceLevel,
-    minSalary: Number(jobData.minSalary),
-    maxSalary: Number(jobData.maxSalary),
-    contact: {
-      phone: jobData.phone,
-      email: jobData.email,
-      applicationUrl: jobData.applicationUrl || '',
+    salary: {
+      min: Number(jobData.minSalary),
+      max: Number(jobData.maxSalary)
     },
+    phone: jobData.phone,
+    email: jobData.email,
     image: {
       url: jobData.image?.url || '',
       alt: jobData.image?.alt || '',
-    }
+    },
+    ...(jobData.jobNumber && { jobNumber: jobData.jobNumber })
   };
 };

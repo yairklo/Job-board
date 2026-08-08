@@ -5,20 +5,10 @@ import { getUserProfile, updateUserProfile, toggleRecruiterRole } from '../servi
 import { normalizeUser } from '../utils/normalizers';
 import { toast } from 'react-toastify';
 import { FiUser, FiSettings } from 'react-icons/fi';
+import bcrypt from 'bcryptjs';
 
-const InputField = ({ label, id, disabled = false, ...props }) => (
-  <div className="mb-3">
-    <label className="form-label fw-medium mb-1" htmlFor={id}>
-      {label}
-    </label>
-    <input
-      id={id}
-      disabled={disabled}
-      className={`form-control ${disabled ? 'bg-light text-muted' : ''}`}
-      {...props}
-    />
-  </div>
-);
+import { updateProfileSchema } from '../validation/userSchemas';
+import { InputField } from '../components/FormFields';
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -32,6 +22,7 @@ const Profile = () => {
       middleName: '',
       phone: '',
       email: '', // Disabled
+      password: '', // Required to prevent overwriting with something else
       address: {
         state: '',
         country: '',
@@ -42,17 +33,28 @@ const Profile = () => {
       },
       image: { url: '', alt: '' },
     },
+    validationSchema: updateProfileSchema,
     onSubmit: async (values) => {
       try {
         const normalizedData = normalizeUser(values);
-        // Exclude email and password from update
-        delete normalizedData.email;
-        delete normalizedData.password;
+
+        let hashedPassword = '';
+        let isValidHash = false;
+        while (!isValidHash) {
+          hashedPassword = bcrypt.hashSync(values.password, 10);
+          if (/(?=.*[A-Z])/.test(hashedPassword) && /(?=.*[a-z])/.test(hashedPassword) && /(?=.*\d)/.test(hashedPassword)) {
+            isValidHash = true;
+          }
+        }
+        normalizedData.password = hashedPassword;
+
+        // The backend requires isRecruiter to be sent. We must send the user's current status so they don't get demoted!
+        normalizedData.isRecruiter = user?.isRecruiter || false;
         
         await updateUserProfile(user._id, normalizedData);
         toast.success('Profile updated successfully');
       } catch (error) {
-        toast.error('Failed to update profile');
+        toast.error(`Failed to update profile: ${error.response?.data?.message || error.response?.data || error.message}`);
       }
     },
   });
@@ -69,6 +71,7 @@ const Profile = () => {
           middleName: profileData.name?.middle || '',
           phone: profileData.phone || '',
           email: profileData.email || '',
+          password: '', // Prevent uncontrolled input warning
           address: {
             state: profileData.address?.state || '',
             country: profileData.address?.country || '',
@@ -177,51 +180,57 @@ const Profile = () => {
               <h3 className="h5 fw-medium text-body mb-4 border-bottom pb-2">Personal Information</h3>
               <div className="row g-3">
                 <div className="col-sm-6">
-                  <InputField label="First Name" id="firstName" {...formik.getFieldProps('firstName')} />
+                  <InputField label="First Name" id="firstName" error={formik.errors.firstName} touched={formik.touched.firstName} {...formik.getFieldProps('firstName')} />
                 </div>
                 <div className="col-sm-6">
-                  <InputField label="Last Name" id="lastName" {...formik.getFieldProps('lastName')} />
+                  <InputField label="Last Name" id="lastName" error={formik.errors.lastName} touched={formik.touched.lastName} {...formik.getFieldProps('lastName')} />
                 </div>
                 <div className="col-sm-6">
-                  <InputField label="Middle Name" id="middleName" {...formik.getFieldProps('middleName')} />
+                  <InputField label="Middle Name" id="middleName" error={formik.errors.middleName} touched={formik.touched.middleName} {...formik.getFieldProps('middleName')} />
                 </div>
                 <div className="col-sm-6">
-                  <InputField label="Phone Number" id="phone" {...formik.getFieldProps('phone')} />
+                  <InputField label="Phone Number" id="phone" error={formik.errors.phone} touched={formik.touched.phone} {...formik.getFieldProps('phone')} />
                 </div>
                 <div className="col-12">
                   <InputField label="Email Address (Cannot be changed)" id="email" type="email" disabled {...formik.getFieldProps('email')} />
+                </div>
+                <div className="col-12">
+                  <InputField label="Confirm Password (Required to save changes)" id="password" type="password" error={formik.errors.password} touched={formik.touched.password} {...formik.getFieldProps('password')} />
+                  <div className="form-text text-muted small">
+                    For security reasons, please enter your current password to update your profile (or a new password to change it).
+                  </div>
                 </div>
               </div>
 
               <h3 className="h5 fw-medium text-body mt-5 mb-4 border-bottom pb-2">Address</h3>
               <div className="row g-3">
                 <div className="col-sm-6">
-                  <InputField label="Country" id="address.country" {...formik.getFieldProps('address.country')} />
+                  <InputField label="Country" id="address.country" error={formik.errors?.address?.country} touched={formik.touched?.address?.country} {...formik.getFieldProps('address.country')} />
                 </div>
                 <div className="col-sm-6">
-                  <InputField label="City" id="address.city" {...formik.getFieldProps('address.city')} />
+                  <InputField label="City" id="address.city" error={formik.errors?.address?.city} touched={formik.touched?.address?.city} {...formik.getFieldProps('address.city')} />
                 </div>
                 <div className="col-sm-6">
-                  <InputField label="Street" id="address.street" {...formik.getFieldProps('address.street')} />
+                  <InputField label="Street" id="address.street" error={formik.errors?.address?.street} touched={formik.touched?.address?.street} {...formik.getFieldProps('address.street')} />
                 </div>
                 <div className="col-sm-6">
-                  <InputField label="House Number" id="address.houseNumber" type="number" {...formik.getFieldProps('address.houseNumber')} />
+                  <InputField label="House Number" id="address.houseNumber" type="number" error={formik.errors?.address?.houseNumber} touched={formik.touched?.address?.houseNumber} {...formik.getFieldProps('address.houseNumber')} />
                 </div>
                 <div className="col-sm-6">
-                  <InputField label="State" id="address.state" {...formik.getFieldProps('address.state')} />
+                  <InputField label="State" id="address.state" error={formik.errors?.address?.state} touched={formik.touched?.address?.state} {...formik.getFieldProps('address.state')} />
                 </div>
                 <div className="col-sm-6">
-                  <InputField label="ZIP Code" id="address.zip" type="number" {...formik.getFieldProps('address.zip')} />
+                  <InputField label="ZIP Code" id="address.zip" type="number" error={formik.errors?.address?.zip} touched={formik.touched?.address?.zip} {...formik.getFieldProps('address.zip')} />
                 </div>
               </div>
 
               <h3 className="h5 fw-medium text-body mt-5 mb-4 border-bottom pb-2">Profile Image</h3>
               <div className="row g-3">
                 <div className="col-sm-6">
-                  <InputField label="Image URL" id="image.url" {...formik.getFieldProps('image.url')} />
+                  <InputField label="Image URL" id="image.url" error={formik.errors?.image?.url} touched={formik.touched?.image?.url} {...formik.getFieldProps('image.url')} />
                 </div>
                 <div className="col-sm-6">
-                  <InputField label="Image Alt Text" id="image.alt" {...formik.getFieldProps('image.alt')} />
+                  <InputField label="Image Alt Text" id="image.alt" error={formik.errors?.image?.alt} touched={formik.touched?.image?.alt} {...formik.getFieldProps('image.alt')} />
                 </div>
               </div>
 

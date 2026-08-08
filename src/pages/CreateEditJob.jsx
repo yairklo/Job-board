@@ -27,8 +27,8 @@ const CreateEditJob = () => {
       maxSalary: '',
       phone: '',
       email: '',
-      applicationUrl: '',
       image: { url: '', alt: '' },
+      jobNumber: undefined,
     },
     validationSchema: jobSchema,
     onSubmit: async (values) => {
@@ -59,17 +59,17 @@ const CreateEditJob = () => {
             description: job.description || '',
             category: job.category || '',
             location: job.location || '',
-            jobType: job.jobType || '',
-            experienceLevel: job.experienceLevel || '',
-            minSalary: job.minSalary || '',
-            maxSalary: job.maxSalary || '',
+            jobType: ['Full-Time', 'Part-Time', 'Freelance', 'Temporary', 'Internship'].find(opt => opt.toLowerCase() === job.jobType?.toLowerCase()) || '',
+            experienceLevel: ['Entry Level', 'Junior', 'Mid-Level', 'Senior', 'Team Lead', 'Management'].find(opt => opt.toLowerCase() === job.experienceLevel?.toLowerCase()) || '',
+            minSalary: job.salary?.min ?? '',
+            maxSalary: job.salary?.max ?? '',
             phone: job.contact?.phone || job.phone || '',
             email: job.contact?.email || job.email || '',
-            applicationUrl: job.contact?.applicationUrl || job.applicationUrl || '',
             image: {
               url: job.image?.url || '',
               alt: job.image?.alt || '',
             },
+            jobNumber: job.jobNumber,
           });
         } catch (error) {
           toast.error('Failed to fetch job data');
@@ -178,9 +178,6 @@ const CreateEditJob = () => {
                   </div>
                   <div className="col-md-6">
                     <InputField label="Contact Email *" id="email" type="email" error={formik.errors.email} touched={formik.touched.email} {...formik.getFieldProps('email')} />
-                  </div>
-                  <div className="col-12">
-                    <InputField label="Application URL (Optional)" id="applicationUrl" error={formik.errors.applicationUrl} touched={formik.touched.applicationUrl} {...formik.getFieldProps('applicationUrl')} />
                   </div>
                   
                   <div className="col-md-6">

@@ -6,8 +6,8 @@ export const jobSchema = Yup.object({
   title: Yup.string().required('Title is required').min(2).max(256),
   company: Yup.string().required('Company is required').min(2).max(256),
   description: Yup.string().required('Description is required').min(2).max(1024),
-  category: Yup.string().required('Category is required').max(25),
-  location: Yup.string().required('Location is required').max(25),
+  category: Yup.string().required('Category is required').min(2).max(256),
+  location: Yup.string().required('Location is required').min(2).max(256),
   jobType: Yup.string().required('Job type is required').oneOf(['Full-Time', 'Part-Time', 'Freelance', 'Temporary', 'Internship']),
   experienceLevel: Yup.string().required('Experience level is required').oneOf(['Entry Level', 'Junior', 'Mid-Level', 'Senior', 'Team Lead', 'Management']),
   minSalary: Yup.number().required('Min salary is required').min(0),
@@ -16,7 +16,6 @@ export const jobSchema = Yup.object({
   }),
   phone: Yup.string().required('Phone is required').matches(phoneRegex, 'Phone must be a valid Israeli format'),
   email: Yup.string().required('Email is required').email('Invalid email address'),
-  applicationUrl: Yup.string().url('Must be a valid URL'),
   image: Yup.object({
     url: Yup.string().url('Must be a valid URL'),
     alt: Yup.string().when('url', {

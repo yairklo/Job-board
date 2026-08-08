@@ -36,7 +36,7 @@ const JobCard = ({ job, onSave, onEdit, onDelete }) => {
         
         {/* Action Buttons - We'll use a custom CSS class for the hover opacity if needed, or just show them on mobile. Let's make them visible but subtle */}
         <div className="position-absolute top-0 end-0 p-3 d-flex gap-2 z-1">
-          {isLoggedIn && !isRecruiter && !isAdmin && (
+          {isLoggedIn && job.recruiter_id !== user?._id && (
             <button onClick={handleSaveClick} className="btn btn-light rounded-circle shadow-sm text-primary p-2 lh-1 action-btn">
               {isSaved ? <FaBookmark /> : <FiBookmark />}
             </button>
@@ -79,7 +79,7 @@ const JobCard = ({ job, onSave, onEdit, onDelete }) => {
             </div>
             <div className="d-flex align-items-center small text-secondary">
               <FiDollarSign className="me-2 text-muted" />
-              {job.minSalary != null ? job.minSalary.toLocaleString() : 'N/A'} - {job.maxSalary != null ? job.maxSalary.toLocaleString() : 'N/A'} ILS
+              {job.salary?.min != null ? job.salary.min.toLocaleString() : 'N/A'} - {job.salary?.max != null ? job.salary.max.toLocaleString() : 'N/A'} ILS
             </div>
           </div>
 

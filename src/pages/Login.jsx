@@ -26,8 +26,12 @@ const Login = () => {
         toast.success('Login successful!');
         navigate('/');
       } catch (error) {
-        // Rely on server to return a specific locked message (e.g. 429 status or 'locked' in message)
-        const errorMessage = error.response?.data?.message || 'Invalid email or password';
+        let errorMessage = 'Invalid email or password';
+        if (error.response?.data) {
+          errorMessage = typeof error.response.data === 'string' 
+            ? error.response.data 
+            : (error.response.data.message || errorMessage);
+        }
         toast.error(errorMessage);
       } finally {
         setIsSubmitting(false);

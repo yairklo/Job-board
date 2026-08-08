@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import ConfirmationModal from '../components/ConfirmationModal';
 import JobDetailsHeader from '../components/JobDetailsHeader';
 import JobDetailsSidebar from '../components/JobDetailsSidebar';
-import { FiChevronLeft } from 'react-icons/fi';
+import { FiChevronLeft, FiSearch } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
 const JobDetails = () => {
@@ -24,8 +24,7 @@ const JobDetails = () => {
         const data = await getJobById(id);
         setJob(data);
       } catch (error) {
-        toast.error('Failed to load job details');
-        navigate('/');
+        setJob(null);
       } finally {
         setIsLoading(false);
       }
@@ -38,7 +37,23 @@ const JobDetails = () => {
   }
 
   if (!job) {
-    return <div className="text-center py-12 text-slate-500">Job not found</div>;
+    return (
+      <div className="container py-5 mt-5 d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '60vh' }}>
+        <div className="text-muted mb-4 p-4 rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: '120px', height: '120px' }}>
+          <FiSearch size={54} className="text-secondary" />
+        </div>
+        <h2 className="fw-bold text-dark mb-3">Job Not Found</h2>
+        <p className="text-secondary text-center mb-5" style={{ maxWidth: '450px', fontSize: '1.1rem' }}>
+          We couldn't find the job posting you're looking for. It may have been removed, or the link might be incorrect.
+        </p>
+        <button 
+          onClick={() => navigate('/')} 
+          className="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow-sm custom-hover"
+        >
+          Browse Other Jobs
+        </button>
+      </div>
+    );
   }
 
   const isSaved = job.savedBy?.includes(user?._id);
@@ -87,6 +102,7 @@ const JobDetails = () => {
           job={job}
           isSaved={isSaved}
           isLoggedIn={isLoggedIn}
+          user={user}
           isRecruiter={isRecruiter}
           isAdmin={isAdmin}
           canEdit={canEdit}

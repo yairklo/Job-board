@@ -117,7 +117,7 @@ const Home = () => {
             <FiSearch className="position-absolute top-50 start-0 translate-middle-y text-secondary ms-3 fs-5" />
             <input
               type="text"
-              placeholder="Search by title, company, category, or location..."
+              placeholder="Search jobs..."
               className="form-control form-control-lg ps-5 border-0 shadow-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

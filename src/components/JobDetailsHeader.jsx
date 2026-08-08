@@ -3,7 +3,7 @@ import { FiMapPin, FiBriefcase, FiDollarSign, FiClock, FiBookmark, FiEdit, FiTra
 import { FaBookmark } from 'react-icons/fa';
 import { formatDistanceToNow } from '../utils/date-utils';
 
-const JobDetailsHeader = ({ job, isSaved, isLoggedIn, isRecruiter, isAdmin, canEdit, canDelete, handleSave, navigate, setIsDeleteModalOpen }) => {
+const JobDetailsHeader = ({ job, isSaved, isLoggedIn, user, isRecruiter, isAdmin, canEdit, canDelete, handleSave, navigate, setIsDeleteModalOpen }) => {
   return (
     <div className="p-4 p-md-5 border-bottom d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-4">
       <div className="d-flex align-items-start gap-4 flex-grow-1">
@@ -21,14 +21,14 @@ const JobDetailsHeader = ({ job, isSaved, isLoggedIn, isRecruiter, isAdmin, canE
           <div className="d-flex flex-wrap gap-3 text-secondary small">
             <span className="d-flex align-items-center"><FiMapPin className="me-1" /> {job.location}</span>
             <span className="d-flex align-items-center"><FiBriefcase className="me-1" /> {job.jobType}</span>
-            <span className="d-flex align-items-center"><FiDollarSign className="me-1" /> {job.minSalary != null ? job.minSalary.toLocaleString() : 'N/A'} - {job.maxSalary != null ? job.maxSalary.toLocaleString() : 'N/A'} ILS</span>
+            <span className="d-flex align-items-center"><FiDollarSign className="me-1" /> {job.salary?.min != null ? job.salary.min.toLocaleString() : 'N/A'} - {job.salary?.max != null ? job.salary.max.toLocaleString() : 'N/A'} ILS</span>
             <span className="d-flex align-items-center"><FiClock className="me-1" /> Posted {formatDistanceToNow(job.createdAt)}</span>
           </div>
         </div>
       </div>
 
       <div className="d-flex gap-2 flex-shrink-0">
-        {isLoggedIn && !isRecruiter && !isAdmin && (
+        {isLoggedIn && job.recruiter_id !== user?._id && (
           <button 
             onClick={handleSave} 
             className={`btn d-flex align-items-center fw-medium ${
