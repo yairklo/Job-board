@@ -1,20 +1,55 @@
 # React Job Board Application
 
-A full-featured, production-ready Job Board Application built with React, Vite, and Bootstrap.
+A React + Vite + Bootstrap job browser with two backends:
 
-## 🚀 Objectives & Features
+- **WhatsApp feed** on the home page — list, filter, and open apply links from the collector API.
+- **Course Job Board API** (`jobboard-api/`) — Node.js + Express + MongoDB for register/login, saved jobs, recruiter posts, and admin.
 
-This application serves two primary user personas:
-- **Job Seekers**: Browse, filter, view details, and save jobs to their personal list.
-- **Recruiters**: Create, edit, and delete their own job postings, and view applicants.
-- **Admins**: Have overarching control to edit and delete any job postings across the platform and manage user statuses.
+## How to run locally
 
-### Key Features
-- **Role-Based Access Control**: Secure routing for Guests, Authenticated Users, Recruiters, and Admins.
-- **Dynamic Search & Filtering**: Real-time filtering with 300ms debounce.
-- **Premium Design**: Fully responsive, dark-mode ready UI built with Bootstrap.
-- **Form Validation**: Robust client-side validation using Formik and Yup.
-- **API Integration**: Centralized Axios instance with request interceptors for JWT auth.
+1. **Install frontend dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Copy env** — `.env.example` to `.env`:
+   ```env
+   VITE_API_URL=http://localhost:8181
+   VITE_JOBS_API_URL=http://167.233.98.192:8787
+   ```
+
+3. **Start the Job Board API** (auth, profile, my-jobs, create/edit):
+   ```bash
+   cd jobboard-api
+   npm install
+   npm run seed
+   npm run dev
+   ```
+   Seed accounts: `admin@jobboard.local` / `Admin1234!`, `recruiter@jobboard.local` / `Recruiter1234!`, `seeker@jobboard.local` / `Seeker1234!`.
+
+4. **Start Vite** from the repo root:
+   ```bash
+   npm run dev
+   ```
+
+Home calls `GET /api/jobs/recent?limit=200` on `VITE_JOBS_API_URL`. Cards show cleaned title, parsed company, WhatsApp group, and date. Job detail `/jobs/:id` is resolved from the recent-list cache. **Apply** opens `applyUrl` in a new tab.
+
+Login, register, saved jobs, my-jobs, and recruiter/admin routes use `VITE_API_URL` (`jobboard-api` on port 8181).
+
+## Feed mapping
+
+Collector `GET /api/jobs/recent` returns `{ ok, jobs, source, mongo, total }`. Each job is normalized in `src/utils/whatsappJob.js`:
+
+| Collector | UI |
+|---|---|
+| `id` | `_id` / `id` (routing key) |
+| `title` | display title — strip `*`, BOM/RTL marks; if pattern is `Role / Company` and `company` is empty, split them |
+| `company` | feed company, or parsed from title, or `—` |
+| `group` | badge + filter |
+| `applyUrl` | Apply CTA (`applicationUrl` alias for older sidebar code) |
+| `status` / `approvalStatus` | detail + filter |
+| `createdAt` / `source` | date and overview |
+| location / salary / jobType | `—` or hidden so cards do not crash |
 
 ## 🛠️ Tech Stack
 
@@ -28,6 +63,7 @@ This application serves two primary user personas:
 - **Styling**: Bootstrap
 - **Icons**: `react-icons`
 - **Testing**: `vitest` + `@testing-library/react`
+- **Course API**: Node.js, Express, MongoDB (Mongoose)
 
 ## 📁 Folder Architecture
 
@@ -46,6 +82,7 @@ src/
 ├── validation/         # Yup schemas
 ├── App.jsx             # Main Application Component
 └── main.jsx            # Entry point
+jobboard-api/           # Node + Express + MongoDB REST API
 ```
 
 ## 👥 User Roles & Permissions Matrix
@@ -65,37 +102,13 @@ src/
 | `/admin` | Admin Dashboard | Admin Only (`isAdmin: true`) |
 | `*` | 404 Not Found | Public |
 
-## ⚙️ Environment Setup
+## 🏃 Other scripts
 
-Create a `.env` file in the root directory and configure your API URL:
-
-```env
-VITE_API_URL=http://localhost:8181
+```bash
+npm run build
+npm run preview
+npm test
 ```
-
-*(See `.env.example` for reference).*
-
-## 🏃 Build & Run Instructions
-
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Start the development server**:
-   ```bash
-   npm run dev
-   ```
-
-3. **Build for production**:
-   ```bash
-   npm run build
-   ```
-
-4. **Preview production build**:
-   ```bash
-   npm run preview
-   ```
 
 ---
 **Submitted by:** Yair Klausner

@@ -5,7 +5,6 @@ import { MemoryRouter } from 'react-router-dom';
 import JobCard from './JobCard';
 import * as AuthContextModule from '../contexts/AuthContext';
 
-// Mock the AuthContext
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
@@ -21,6 +20,22 @@ const mockJob = {
   createdAt: new Date().toISOString(),
   recruiter_id: 'recruiter1',
   savedBy: ['user1'],
+};
+
+const whatsappJob = {
+  _id: 'a906d4d5cb6e3a93d239ea7b45a983ba',
+  title: 'Security Engineer',
+  company: 'Salt Security',
+  group: 'Referally Junior 1-2 🐊',
+  location: '—',
+  jobType: '—',
+  salary: null,
+  experienceLevel: '—',
+  status: 'awaiting_approval',
+  applyUrl: 'https://www.linkedin.com/jobs/view/4448855970',
+  createdAt: '2026-09-02T18:12:56.587Z',
+  recruiter_id: null,
+  savedBy: [],
 };
 
 describe('JobCard', () => {
@@ -41,6 +56,22 @@ describe('JobCard', () => {
     expect(screen.getByText('Mid')).toBeInTheDocument();
   });
 
+  it('renders WhatsApp jobs without salary or location', () => {
+    AuthContextModule.useAuth.mockReturnValue({ isLoggedIn: false });
+
+    render(
+      <MemoryRouter>
+        <JobCard job={whatsappJob} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Security Engineer')).toBeInTheDocument();
+    expect(screen.getByText('Salt Security')).toBeInTheDocument();
+    expect(screen.getAllByText('Referally Junior 1-2 🐊').length).toBeGreaterThan(0);
+    expect(screen.getByText('Apply link available')).toBeInTheDocument();
+    expect(screen.queryByText(/ILS/)).not.toBeInTheDocument();
+  });
+
   it('shows save button when logged in and not the recruiter', () => {
     AuthContextModule.useAuth.mockReturnValue({ isLoggedIn: true, user: { _id: 'user2' } });
 
@@ -51,7 +82,7 @@ describe('JobCard', () => {
     );
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons.length).toBe(1); // Only save button
+    expect(buttons.length).toBe(1);
   });
 
   it('shows edit and delete buttons for admin', () => {
@@ -63,7 +94,6 @@ describe('JobCard', () => {
       </MemoryRouter>
     );
 
-    // Should have save, edit, and delete buttons (save is also there because admin != recruiter1)
     const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBe(3);
   });
@@ -94,10 +124,9 @@ describe('JobCard', () => {
     );
 
     const buttons = screen.getAllByRole('button');
-    // Save (0), Edit (1), Delete (2)
     fireEvent.click(buttons[1]);
     expect(handleEdit).toHaveBeenCalledWith('123');
-    
+
     fireEvent.click(buttons[2]);
     expect(handleDelete).toHaveBeenCalledWith('123');
   });
