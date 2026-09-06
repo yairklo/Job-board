@@ -24,13 +24,20 @@ export const getRecentJobs = async (params = {}) => {
 };
 
 export const getAllJobs = async (params) => {
-  const { jobs } = await getRecentJobs(params);
-  return jobs;
+  const { data } = await apiClient.get('/jobs', { params });
+  return data;
 };
 
 export const getJobById = async (jobId) => {
   const cached = findCachedJobById(jobId);
   if (cached) return cached;
+
+  try {
+    const { data } = await apiClient.get(`/jobs/${jobId}`);
+    if (data) return data;
+  } catch (_err) {
+    // Fall through to the WhatsApp recent feed.
+  }
 
   const { jobs } = await getRecentJobs({ limit: DEFAULT_RECENT_LIMIT });
   const found = jobs.find((job) => job._id === jobId || job.id === jobId);

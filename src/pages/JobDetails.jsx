@@ -44,7 +44,7 @@ const JobDetails = () => {
         </div>
         <h2 className="fw-bold text-dark mb-3">Job Not Found</h2>
         <p className="text-secondary text-center mb-5" style={{ maxWidth: '450px', fontSize: '1.1rem' }}>
-          We couldn't find this job in the recent WhatsApp feed. It may have aged out of the list, or the link might be incorrect.
+          We couldn't find this job on the Job Board or in the recent WhatsApp feed. It may have been removed, or the link might be incorrect.
         </p>
         <button
           onClick={() => navigate('/')}

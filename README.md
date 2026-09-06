@@ -2,8 +2,8 @@
 
 A React + Vite + Bootstrap job browser with two backends:
 
-- **WhatsApp feed** on the home page — list, filter, and open apply links from the collector API.
-- **Course Job Board API** (`jobboard-api/`) — Node.js + Express + MongoDB for register/login, saved jobs, recruiter posts, and admin.
+- **Job Board** on `/` — recruiter listings from `jobboard-api` (register, save, post, admin).
+- **WhatsApp feed** on `/whatsapp` — list, filter, and open apply links from the collector API.
 
 ## How to run locally
 
@@ -32,7 +32,7 @@ A React + Vite + Bootstrap job browser with two backends:
    npm run dev
    ```
 
-Home calls `GET /api/jobs/recent?limit=200` on `VITE_JOBS_API_URL`. Cards show cleaned title, parsed company, WhatsApp group, and date. Job detail `/jobs/:id` is resolved from the recent-list cache. **Apply** opens `applyUrl` in a new tab.
+Home calls `GET /jobs` on `VITE_API_URL`. `/whatsapp` calls `GET /api/jobs/recent?limit=200` on `VITE_JOBS_API_URL`. Job detail `/jobs/:id` tries the Job Board first, then the WhatsApp recent-list cache. **Apply** on feed jobs opens `applyUrl` in a new tab.
 
 Login, register, saved jobs, my-jobs, and recruiter/admin routes use `VITE_API_URL` (`jobboard-api` on port 8181).
 

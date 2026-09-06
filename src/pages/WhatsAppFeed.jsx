@@ -1,21 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { getAllJobs, toggleSaveJob } from '../services/jobsService';
-import { useAuth } from '../contexts/AuthContext';
+import { getRecentJobs } from '../services/jobsService';
+import { filterWhatsAppJobs } from '../utils/whatsappJob';
 import JobCard from '../components/JobCard';
 import JobCardSkeleton from '../components/JobCardSkeleton';
 import EmptyState from '../components/EmptyState';
 import { toast } from 'react-toastify';
 import { FiSearch } from 'react-icons/fi';
 
-const Home = () => {
-  const { user } = useAuth();
+const WhatsAppFeed = () => {
   const [allJobs, setAllJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [jobType, setJobType] = useState('');
-  const [experienceLevel, setExperienceLevel] = useState('');
+  const [group, setGroup] = useState('');
+  const [status, setStatus] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 9;
 
@@ -31,11 +29,10 @@ const Home = () => {
     const fetchJobs = async () => {
       try {
         setIsLoading(true);
-        const data = await getAllJobs();
-        const fetchedJobs = Array.isArray(data) ? data : data.docs || [];
-        setAllJobs(fetchedJobs);
+        const data = await getRecentJobs({ limit: 200 });
+        setAllJobs(data.jobs || []);
       } catch (error) {
-        toast.error('Failed to load jobs. Please try again.');
+        toast.error('Failed to load WhatsApp jobs. Please try again.');
       } finally {
         setIsLoading(false);
       }
@@ -43,22 +40,24 @@ const Home = () => {
     fetchJobs();
   }, []);
 
-  const filteredJobs = useMemo(() => {
-    return allJobs.filter((job) => {
-      const searchLower = debouncedSearch.toLowerCase();
-      const matchesSearch =
-        !debouncedSearch ||
-        (job.title && String(job.title).toLowerCase().includes(searchLower)) ||
-        (job.company && String(job.company).toLowerCase().includes(searchLower)) ||
-        (job.category && String(job.category).toLowerCase().includes(searchLower)) ||
-        (job.location && String(job.location).toLowerCase().includes(searchLower));
+  const groupOptions = useMemo(
+    () => [...new Set(allJobs.map((job) => job.group).filter((value) => value && value !== '—'))].sort(),
+    [allJobs]
+  );
 
-      const matchesType = !jobType || (job.jobType && String(job.jobType).toLowerCase().trim() === String(jobType).toLowerCase().trim());
-      const matchesExperience = !experienceLevel || (job.experienceLevel && String(job.experienceLevel).toLowerCase().trim() === String(experienceLevel).toLowerCase().trim());
-
-      return matchesSearch && matchesType && matchesExperience;
+  const statusOptions = useMemo(() => {
+    const values = new Set();
+    allJobs.forEach((job) => {
+      if (job.status) values.add(job.status);
+      if (job.approvalStatus) values.add(job.approvalStatus);
     });
-  }, [allJobs, debouncedSearch, jobType, experienceLevel]);
+    return [...values].sort();
+  }, [allJobs]);
+
+  const filteredJobs = useMemo(
+    () => filterWhatsAppJobs(allJobs, { search: debouncedSearch, group, status }),
+    [allJobs, debouncedSearch, group, status]
+  );
 
   const totalPages = Math.max(1, Math.ceil(filteredJobs.length / limit));
 
@@ -73,44 +72,30 @@ const Home = () => {
     return filteredJobs.slice(startIndex, startIndex + limit);
   }, [filteredJobs, currentPage]);
 
-  const handleSaveJob = async (jobId) => {
-    try {
-      await toggleSaveJob(jobId);
-      const userId = user?._id;
-      setAllJobs((prevJobs) => prevJobs.map((job) => (
-        job._id === jobId
-          ? {
-              ...job,
-              savedBy: job.savedBy?.includes(userId)
-                ? job.savedBy.filter((id) => id !== userId)
-                : [...(job.savedBy || []), userId],
-            }
-          : job
-      )));
-      toast.success('Job saved status updated');
-    } catch (error) {
-      toast.error('Failed to save job');
-    }
-  };
-
   const handleFilterChange = () => {
     setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setSearch('');
+    setGroup('');
+    setStatus('');
   };
 
   return (
     <div className="d-flex flex-column gap-5">
       <div className="bg-primary rounded-4 p-4 p-md-5 text-center text-white shadow">
-        <h1 className="display-5 fw-bolder mb-3">Find Your Dream Job</h1>
+        <h1 className="display-5 fw-bolder mb-3">WhatsApp job feed</h1>
         <p className="lead text-white-50 mx-auto mb-4" style={{ maxWidth: '600px' }}>
-          Browse openings posted by recruiters on WebifyJobs, or jump to the WhatsApp feed for group listings.
+          Browse roles collected from WhatsApp groups. Search, filter, and open the original apply link.
         </p>
 
-        <div className="mx-auto d-flex flex-column flex-md-row gap-3" style={{ maxWidth: '800px' }}>
+        <div className="mx-auto d-flex flex-column flex-md-row gap-3" style={{ maxWidth: '900px' }}>
           <div className="position-relative flex-grow-1 min-w-0">
             <FiSearch className="position-absolute top-50 start-0 translate-middle-y text-secondary ms-3 fs-5" />
             <input
               type="text"
-              placeholder="Search jobs..."
+              placeholder="Search title, company, or group..."
               className="form-control form-control-lg ps-5 border-0 shadow-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -118,41 +103,32 @@ const Home = () => {
           </div>
           <select
             className="form-select form-select-lg border-0 shadow-sm"
-            value={jobType}
-            onChange={(e) => { setJobType(e.target.value); handleFilterChange(); }}
+            value={group}
+            onChange={(e) => { setGroup(e.target.value); handleFilterChange(); }}
+            aria-label="Filter by WhatsApp group"
           >
-            <option value="">All Job Types</option>
-            <option value="Full-Time">Full-Time</option>
-            <option value="Part-Time">Part-Time</option>
-            <option value="Freelance">Freelance</option>
-            <option value="Temporary">Temporary</option>
-            <option value="Internship">Internship</option>
+            <option value="">All groups</option>
+            {groupOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
           </select>
           <select
             className="form-select form-select-lg border-0 shadow-sm"
-            value={experienceLevel}
-            onChange={(e) => { setExperienceLevel(e.target.value); handleFilterChange(); }}
+            value={status}
+            onChange={(e) => { setStatus(e.target.value); handleFilterChange(); }}
+            aria-label="Filter by status"
           >
-            <option value="">All Experience</option>
-            <option value="Entry Level">Entry Level</option>
-            <option value="Junior">Junior</option>
-            <option value="Mid-Level">Mid-Level</option>
-            <option value="Senior">Senior</option>
-            <option value="Team Lead">Team Lead</option>
-            <option value="Management">Management</option>
+            <option value="">All statuses</option>
+            {statusOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
           </select>
-        </div>
-
-        <div className="mt-4">
-          <Link to="/whatsapp" className="text-white text-decoration-underline fw-medium">
-            Browse WhatsApp job feed
-          </Link>
         </div>
       </div>
 
       <div>
         <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
-          <h2 className="h3 fw-bold mb-0">Latest Opportunities</h2>
+          <h2 className="h3 fw-bold mb-0">Latest from WhatsApp</h2>
           <span className="text-secondary fw-medium">
             {filteredJobs.length} jobs found
           </span>
@@ -170,17 +146,14 @@ const Home = () => {
           <EmptyState
             title="No jobs found"
             message="We couldn't find any jobs matching your search criteria. Try adjusting your filters."
-            action={{ label: 'Clear Filters', onClick: () => { setSearch(''); setJobType(''); setExperienceLevel(''); } }}
+            action={{ label: 'Clear Filters', onClick: clearFilters }}
           />
         ) : (
           <>
             <div className="row g-4">
               {displayedJobs.map((job) => (
-                <div className="col-12 col-md-6 col-lg-4" key={job._id}>
-                  <JobCard
-                    job={job}
-                    onSave={handleSaveJob}
-                  />
+                <div className="col-12 col-md-6 col-lg-4" key={job._id || job.id}>
+                  <JobCard job={job} />
                 </div>
               ))}
             </div>
@@ -213,4 +186,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default WhatsAppFeed;
