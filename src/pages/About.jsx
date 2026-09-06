@@ -6,25 +6,22 @@ const About = () => {
     <div className="container py-5 mt-4" style={{ maxWidth: '900px' }}>
       <div className="text-center mb-5 pb-3">
         <h1 className="display-4 fw-bolder text-body">
-          About this job feed
+          About WebifyJobs
         </h1>
         <p className="lead text-secondary mt-3 mx-auto" style={{ maxWidth: '600px' }}>
-          A personal browser for roles collected from WhatsApp groups. It is meant for local use against the collector API.
+          A Job Board for seekers and recruiters, plus a personal feed of roles collected from WhatsApp groups.
         </p>
       </div>
 
       <div className="card shadow-sm border-0 rounded-4 mb-5 overflow-hidden">
         <div className="card-body p-4 p-md-5">
-          <h2 className="h3 fw-bold text-body mb-4">What you can do</h2>
+          <h2 className="h3 fw-bold text-body mb-4">Two ways to browse</h2>
           <div className="text-secondary" style={{ fontSize: '1.1rem', lineHeight: '1.7' }}>
             <p className="mb-4">
-              The home page loads recent jobs from <code>GET /api/jobs/recent</code>. Titles are cleaned
-              (markdown asterisks and hidden RTL marks) and company names are parsed from
-              <code> Role / Company </code> when the collector left company blank.
+              The home page lists jobs from the WebifyJobs API — register, save roles, and post listings if you are a recruiter.
             </p>
             <p className="mb-0">
-              Open a job for group, status, and dates, then use Apply to follow the original link
-              (usually LinkedIn). This UI does not post applications and does not talk to the old recruiter backend.
+              The WhatsApp feed loads recent jobs from the collector API. Titles are cleaned and company names are parsed when needed. Apply opens the original posting.
             </p>
           </div>
         </div>
@@ -33,21 +30,21 @@ const About = () => {
       <div className="row g-4 mb-5">
         <div className="col-md-6">
           <div className="h-100 p-4 p-md-5 rounded-4 border bg-primary bg-opacity-10 border-primary border-opacity-25">
-            <h3 className="h4 fw-bold text-primary mb-3">Browse</h3>
+            <h3 className="h4 fw-bold text-primary mb-3">Job Board</h3>
             <ul className="list-unstyled mb-4 text-primary text-opacity-75 d-flex flex-column gap-2">
               <li className="d-flex align-items-start">
-                <span className="me-2">•</span> Search title, company, or WhatsApp group
+                <span className="me-2">•</span> Discover roles posted by recruiters
               </li>
               <li className="d-flex align-items-start">
-                <span className="me-2">•</span> Filter by group and status
+                <span className="me-2">•</span> Save jobs and manage your profile
               </li>
               <li className="d-flex align-items-start">
-                <span className="me-2">•</span> Hebrew titles render with automatic text direction
+                <span className="me-2">•</span> Recruiters can create, edit, and delete listings
               </li>
             </ul>
             <div>
               <Link to="/" className="fw-medium text-primary text-decoration-none custom-hover">
-                Open the feed &rarr;
+                Browse the job board &rarr;
               </Link>
             </div>
           </div>
@@ -55,18 +52,23 @@ const About = () => {
 
         <div className="col-md-6">
           <div className="h-100 p-4 p-md-5 rounded-4 border bg-light">
-            <h3 className="h4 fw-bold text-body mb-3">Out of scope</h3>
-            <ul className="list-unstyled mb-0 text-secondary d-flex flex-column gap-2">
+            <h3 className="h4 fw-bold text-body mb-3">WhatsApp Feed</h3>
+            <ul className="list-unstyled mb-4 text-secondary d-flex flex-column gap-2">
               <li className="d-flex align-items-start">
-                <span className="me-2">•</span> Login, saved jobs, and recruiter admin stay unused
+                <span className="me-2">•</span> Search title, company, or group
               </li>
               <li className="d-flex align-items-start">
-                <span className="me-2">•</span> No applying from this UI (JobHelper is separate)
+                <span className="me-2">•</span> Filter by WhatsApp group and status
               </li>
               <li className="d-flex align-items-start">
-                <span className="me-2">•</span> Local phase only — not deployed
+                <span className="me-2">•</span> Open the original apply link
               </li>
             </ul>
+            <div>
+              <Link to="/whatsapp" className="fw-medium text-primary text-decoration-none custom-hover">
+                Open the WhatsApp feed &rarr;
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -16,7 +16,7 @@ const JobDetailsHeader = ({ job, isSaved, isLoggedIn, user, isRecruiter, isAdmin
 
   return (
     <div className="p-4 p-md-5 border-bottom d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-4">
-      <div className="d-flex align-items-start gap-4 flex-grow-1">
+      <div className="d-flex align-items-start gap-3 gap-md-4 flex-grow-1 min-w-0">
         <div className="flex-shrink-0 bg-light rounded-4 d-flex align-items-center justify-content-center overflow-hidden shadow-sm border" style={{ width: '80px', height: '80px' }}>
           {job.image?.url ? (
             <img src={job.image.url} alt={job.image.alt || job.company} className="w-100 h-100 object-fit-cover" onError={(e) => { e.target.style.display = 'none'; }} />
@@ -24,8 +24,8 @@ const JobDetailsHeader = ({ job, isSaved, isLoggedIn, user, isRecruiter, isAdmin
             <FiBriefcase className="text-secondary fs-1" />
           )}
         </div>
-        <div>
-          <h1 className="h2 fw-bold text-body mb-2" dir="auto">{job.title}</h1>
+        <div className="min-w-0">
+          <h1 className="h2 fw-bold text-body mb-2 text-break" dir="auto">{job.title}</h1>
           <p className="h5 text-primary fw-medium mb-3" dir="auto">{job.company || '—'}</p>
 
           <div className="d-flex flex-wrap gap-3 text-secondary small">

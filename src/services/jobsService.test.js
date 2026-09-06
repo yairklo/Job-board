@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { jobsFeedClient } from './apiClient';
+import apiClient, { jobsFeedClient } from './apiClient';
 import { getAllJobs, getJobById, getRecentJobs } from './jobsService';
 import { clearCachedJobs } from './jobsCache';
 
@@ -30,12 +30,23 @@ describe('jobsService', () => {
     clearCachedJobs();
   });
 
+  it('loads Job Board jobs from GET /jobs', async () => {
+    apiClient.get.mockResolvedValueOnce({
+      data: [{ _id: '1', title: 'React Developer' }],
+    });
+
+    const jobs = await getAllJobs();
+
+    expect(apiClient.get).toHaveBeenCalledWith('/jobs', { params: undefined });
+    expect(jobs[0].title).toBe('React Developer');
+  });
+
   it('loads recent jobs from /api/jobs/recent and normalizes them', async () => {
     jobsFeedClient.get.mockResolvedValueOnce({
       data: { ok: true, jobs: [sampleJob], total: 1, source: 'mongo+jobdb' },
     });
 
-    const jobs = await getAllJobs({ limit: 80 });
+    const { jobs } = await getRecentJobs({ limit: 80 });
 
     expect(jobsFeedClient.get).toHaveBeenCalledWith('/api/jobs/recent', { params: { limit: 80 } });
     expect(jobs[0]._id).toBe('abc123');
@@ -51,23 +62,24 @@ describe('jobsService', () => {
     await getRecentJobs();
     const job = await getJobById('abc123');
 
-    expect(jobsFeedClient.get).toHaveBeenCalledTimes(1);
+    expect(apiClient.get).not.toHaveBeenCalled();
     expect(job.title).toBe('Security Engineer');
     expect(job.applyUrl).toBe('https://example.com/apply');
   });
 
-  it('refetches recent jobs when the id is not cached', async () => {
+  it('falls back to the WhatsApp feed when the Job Board id is missing', async () => {
+    apiClient.get.mockRejectedValueOnce(new Error('Not found'));
     jobsFeedClient.get.mockResolvedValueOnce({
       data: { ok: true, jobs: [sampleJob], total: 1 },
     });
 
     const job = await getJobById('abc123');
 
-    expect(jobsFeedClient.get).toHaveBeenCalledTimes(1);
     expect(job._id).toBe('abc123');
   });
 
-  it('throws when the id is not in the recent feed', async () => {
+  it('throws when the id is not in either source', async () => {
+    apiClient.get.mockRejectedValueOnce(new Error('Not found'));
     jobsFeedClient.get.mockResolvedValueOnce({
       data: { ok: true, jobs: [sampleJob], total: 1 },
     });

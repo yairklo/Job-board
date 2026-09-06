@@ -5,6 +5,7 @@ import MainLayout from '../layouts/MainLayout';
 
 // Pages
 import Home from '../pages/Home';
+import WhatsAppFeed from '../pages/WhatsAppFeed';
 import JobDetails from '../pages/JobDetails';
 import About from '../pages/About';
 import Login from '../pages/Login';
@@ -34,6 +35,7 @@ const AppRoutes = () => {
       <Route element={<MainLayout />}>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
+        <Route path="/whatsapp" element={<WhatsAppFeed />} />
         <Route path="/jobs/:id" element={<JobDetails />} />
         <Route path="/about" element={<About />} />
         <Route path="*" element={<NotFound />} />

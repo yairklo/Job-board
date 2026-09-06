@@ -44,7 +44,7 @@ const JobCard = ({ job, onSave, onEdit, onDelete }) => {
 
   return (
     <Link to={`/jobs/${jobId}`} className="text-decoration-none">
-      <div className="card h-100 shadow-sm custom-card-hover border position-relative group">
+      <div className="card h-100 shadow-sm custom-card-hover border position-relative overflow-hidden">
         <div className="position-absolute top-0 end-0 p-3 d-flex gap-2 z-1">
           {isLoggedIn && job.recruiter_id && job.recruiter_id !== user?._id && (
             <button onClick={handleSaveClick} className="btn btn-light rounded-circle shadow-sm text-primary p-2 lh-1 action-btn">
@@ -72,24 +72,24 @@ const JobCard = ({ job, onSave, onEdit, onDelete }) => {
                 <FiBriefcase className="text-secondary fs-4" />
               )}
             </div>
-            <div className="ms-3 flex-grow-1 pe-5">
-              <h3 className="h6 fw-semibold text-body mb-1 text-truncate" title={job.title} dir="auto">{job.title}</h3>
-              <p className="text-secondary fw-medium mb-0 small" dir="auto">{job.company || '—'}</p>
+            <div className="ms-3 flex-grow-1 min-w-0 pe-4">
+              <h3 className="h6 fw-semibold text-body mb-1 job-card-title" title={job.title} dir="auto">{job.title}</h3>
+              <p className="text-secondary fw-medium mb-0 small text-truncate" title={job.company || '—'} dir="auto">{job.company || '—'}</p>
             </div>
           </div>
 
           <div className="d-flex flex-column gap-2 mb-4 flex-grow-1">
-            <div className="d-flex align-items-center small text-secondary">
+            <div className="d-flex align-items-center small text-secondary min-w-0">
               {groupLabel && (!job.location || job.location === '—') ? (
-                <FiUsers className="me-2 text-muted" />
+                <FiUsers className="me-2 text-muted flex-shrink-0" />
               ) : (
-                <FiMapPin className="me-2 text-muted" />
+                <FiMapPin className="me-2 text-muted flex-shrink-0" />
               )}
-              <span dir="auto">{locationLabel}</span>
+              <span className="text-truncate" dir="auto">{locationLabel}</span>
             </div>
-            <div className="d-flex align-items-center small text-secondary">
-              <FiBriefcase className="me-2 text-muted" />
-              {typeLabel}
+            <div className="d-flex align-items-center small text-secondary min-w-0">
+              <FiBriefcase className="me-2 text-muted flex-shrink-0" />
+              <span className="text-truncate">{typeLabel}</span>
             </div>
             <div className="d-flex align-items-center small text-secondary">
               {job.applyUrl ? (
