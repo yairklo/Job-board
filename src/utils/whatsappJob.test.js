@@ -84,5 +84,14 @@ describe('whatsappJob', () => {
       expect(filterWhatsAppJobs(jobs, { group: 'Referally Junior 1-2 🐊' })).toHaveLength(1);
       expect(filterWhatsAppJobs(jobs, { status: 'pending' })).toHaveLength(2);
     });
+
+    it('filters by date added', () => {
+      const datedJobs = [
+        { title: 'New', company: 'A', group: 'G', createdAt: new Date().toISOString() },
+        { title: 'Old', company: 'B', group: 'G', createdAt: '2020-01-01T00:00:00.000Z' },
+      ];
+      expect(filterWhatsAppJobs(datedJobs, { dateAdded: '7' })).toHaveLength(1);
+      expect(filterWhatsAppJobs(datedJobs, { dateAdded: '7' })[0].title).toBe('New');
+    });
   });
 });

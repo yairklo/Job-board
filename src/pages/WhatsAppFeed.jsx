@@ -4,6 +4,7 @@ import { filterWhatsAppJobs } from '../utils/whatsappJob';
 import JobCard from '../components/JobCard';
 import JobCardSkeleton from '../components/JobCardSkeleton';
 import EmptyState from '../components/EmptyState';
+import DateAddedFilter from '../components/DateAddedFilter';
 import { toast } from 'react-toastify';
 import { FiSearch } from 'react-icons/fi';
 
@@ -14,6 +15,7 @@ const WhatsAppFeed = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [group, setGroup] = useState('');
   const [status, setStatus] = useState('');
+  const [dateAdded, setDateAdded] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 9;
 
@@ -55,8 +57,8 @@ const WhatsAppFeed = () => {
   }, [allJobs]);
 
   const filteredJobs = useMemo(
-    () => filterWhatsAppJobs(allJobs, { search: debouncedSearch, group, status }),
-    [allJobs, debouncedSearch, group, status]
+    () => filterWhatsAppJobs(allJobs, { search: debouncedSearch, group, status, dateAdded }),
+    [allJobs, debouncedSearch, group, status, dateAdded]
   );
 
   const totalPages = Math.max(1, Math.ceil(filteredJobs.length / limit));
@@ -80,6 +82,7 @@ const WhatsAppFeed = () => {
     setSearch('');
     setGroup('');
     setStatus('');
+    setDateAdded('');
   };
 
   return (
@@ -90,7 +93,7 @@ const WhatsAppFeed = () => {
           Browse roles collected from WhatsApp groups. Search, filter, and open the original apply link.
         </p>
 
-        <div className="mx-auto d-flex flex-column flex-md-row gap-3" style={{ maxWidth: '900px' }}>
+        <div className="mx-auto d-flex flex-column flex-lg-row flex-wrap gap-3" style={{ maxWidth: '960px' }}>
           <div className="position-relative flex-grow-1 min-w-0">
             <FiSearch className="position-absolute top-50 start-0 translate-middle-y text-secondary ms-3 fs-5" />
             <input
@@ -123,6 +126,10 @@ const WhatsAppFeed = () => {
               <option key={option} value={option}>{option}</option>
             ))}
           </select>
+          <DateAddedFilter
+            value={dateAdded}
+            onChange={(value) => { setDateAdded(value); handleFilterChange(); }}
+          />
         </div>
       </div>
 

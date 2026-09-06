@@ -1,3 +1,5 @@
+import { matchesDateAdded } from './date-utils';
+
 const INVISIBLE_MARKS = /[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g;
 
 export const stripDisplayMarks = (value) =>
@@ -74,7 +76,7 @@ export const normalizeWhatsAppJob = (job = {}) => {
   };
 };
 
-export const filterWhatsAppJobs = (jobs, { search = '', group = '', status = '' } = {}) => {
+export const filterWhatsAppJobs = (jobs, { search = '', group = '', status = '', dateAdded = '' } = {}) => {
   const searchLower = search.trim().toLowerCase();
   const groupFilter = group.trim();
   const statusFilter = status.trim();
@@ -92,6 +94,6 @@ export const filterWhatsAppJobs = (jobs, { search = '', group = '', status = '' 
       job.status === statusFilter ||
       job.approvalStatus === statusFilter;
 
-    return matchesSearch && matchesGroup && matchesStatus;
+    return matchesSearch && matchesGroup && matchesStatus && matchesDateAdded(job.createdAt, dateAdded);
   });
 };
