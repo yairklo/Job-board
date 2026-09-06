@@ -1,42 +1,52 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FiMapPin, FiBriefcase, FiDollarSign, FiClock, FiBookmark, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiMapPin, FiBriefcase, FiDollarSign, FiClock, FiBookmark, FiEdit, FiTrash2, FiUsers, FiExternalLink } from 'react-icons/fi';
 import { FaBookmark } from 'react-icons/fa';
-import { formatDistanceToNow } from '../utils/date-utils';
+
+const formatSalary = (salary) => {
+  if (salary?.min == null && salary?.max == null) return '—';
+  const min = salary.min != null ? salary.min.toLocaleString() : '—';
+  const max = salary.max != null ? salary.max.toLocaleString() : '—';
+  return `${min} - ${max} ILS`;
+};
 
 const JobCard = ({ job, onSave, onEdit, onDelete }) => {
   const { user, isLoggedIn, isRecruiter, isAdmin } = useAuth();
-  
+
   const isSaved = job.savedBy?.includes(user?._id);
   const canEdit = isAdmin || (isRecruiter && job.recruiter_id === user?._id);
   const canDelete = isAdmin || (isRecruiter && job.recruiter_id === user?._id);
+  const jobId = job._id || job.id;
+  const groupLabel = job.group && job.group !== '—' ? job.group : null;
+  const locationLabel = job.location && job.location !== '—' ? job.location : groupLabel || '—';
+  const typeLabel = job.jobType && job.jobType !== '—' ? job.jobType : (job.status || '—');
+  const badgeLabel = job.experienceLevel && job.experienceLevel !== '—'
+    ? job.experienceLevel
+    : (groupLabel || job.approvalStatus || 'WhatsApp');
 
   const handleSaveClick = (e) => {
     e.stopPropagation();
-    if (onSave) onSave(job._id);
+    if (onSave) onSave(jobId);
   };
 
   const handleEditClick = (e) => {
     e.stopPropagation();
-    if (onEdit) onEdit(job._id);
+    if (onEdit) onEdit(jobId);
   };
 
   const handleDeleteClick = (e) => {
     e.stopPropagation();
-    if (onDelete) onDelete(job._id);
+    if (onDelete) onDelete(jobId);
   };
 
-  const formattedDate = new Date(job.createdAt).toLocaleDateString();
-  const timeAgo = job.createdAt ? `${formattedDate}` : 'Recently'; // Simulating time ago for simplicity without external lib if needed
+  const formattedDate = job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Recently';
 
   return (
-    <Link to={`/jobs/${job._id}`} className="text-decoration-none">
+    <Link to={`/jobs/${jobId}`} className="text-decoration-none">
       <div className="card h-100 shadow-sm custom-card-hover border position-relative group">
-        
-        {/* Action Buttons - We'll use a custom CSS class for the hover opacity if needed, or just show them on mobile. Let's make them visible but subtle */}
         <div className="position-absolute top-0 end-0 p-3 d-flex gap-2 z-1">
-          {isLoggedIn && job.recruiter_id !== user?._id && (
+          {isLoggedIn && job.recruiter_id && job.recruiter_id !== user?._id && (
             <button onClick={handleSaveClick} className="btn btn-light rounded-circle shadow-sm text-primary p-2 lh-1 action-btn">
               {isSaved ? <FaBookmark /> : <FiBookmark />}
             </button>
@@ -63,33 +73,46 @@ const JobCard = ({ job, onSave, onEdit, onDelete }) => {
               )}
             </div>
             <div className="ms-3 flex-grow-1 pe-5">
-              <h3 className="h6 fw-semibold text-body mb-1 text-truncate" title={job.title}>{job.title}</h3>
-              <p className="text-secondary fw-medium mb-0 small">{job.company}</p>
+              <h3 className="h6 fw-semibold text-body mb-1 text-truncate" title={job.title} dir="auto">{job.title}</h3>
+              <p className="text-secondary fw-medium mb-0 small" dir="auto">{job.company || '—'}</p>
             </div>
           </div>
 
           <div className="d-flex flex-column gap-2 mb-4 flex-grow-1">
             <div className="d-flex align-items-center small text-secondary">
-              <FiMapPin className="me-2 text-muted" />
-              {job.location}
+              {groupLabel && (!job.location || job.location === '—') ? (
+                <FiUsers className="me-2 text-muted" />
+              ) : (
+                <FiMapPin className="me-2 text-muted" />
+              )}
+              <span dir="auto">{locationLabel}</span>
             </div>
             <div className="d-flex align-items-center small text-secondary">
               <FiBriefcase className="me-2 text-muted" />
-              {job.jobType}
+              {typeLabel}
             </div>
             <div className="d-flex align-items-center small text-secondary">
-              <FiDollarSign className="me-2 text-muted" />
-              {job.salary?.min != null ? job.salary.min.toLocaleString() : 'N/A'} - {job.salary?.max != null ? job.salary.max.toLocaleString() : 'N/A'} ILS
+              {job.applyUrl ? (
+                <>
+                  <FiExternalLink className="me-2 text-muted" />
+                  Apply link available
+                </>
+              ) : (
+                <>
+                  <FiDollarSign className="me-2 text-muted" />
+                  {formatSalary(job.salary)}
+                </>
+              )}
             </div>
           </div>
 
           <div className="mt-auto pt-3 border-top d-flex align-items-center justify-content-between">
-            <span className="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill fw-medium">
-              {job.experienceLevel}
+            <span className="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill fw-medium text-truncate" style={{ maxWidth: '70%' }} dir="auto">
+              {badgeLabel}
             </span>
             <span className="small text-muted d-flex align-items-center">
               <FiClock className="me-1" />
-              {timeAgo}
+              {formattedDate}
             </span>
           </div>
         </div>

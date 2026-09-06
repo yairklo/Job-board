@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://api.webify.host';
+const API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_JOBS_API_URL || 'http://167.233.98.192:8787';
 
 const apiClient = axios.create({
   baseURL: API_URL,

@@ -12,7 +12,7 @@ const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, isLoggedIn, isRecruiter, isAdmin } = useAuth();
-  
+
   const [job, setJob] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -33,7 +33,7 @@ const JobDetails = () => {
   }, [id, navigate]);
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
+    return <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '16rem' }}><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></div>;
   }
 
   if (!job) {
@@ -44,10 +44,10 @@ const JobDetails = () => {
         </div>
         <h2 className="fw-bold text-dark mb-3">Job Not Found</h2>
         <p className="text-secondary text-center mb-5" style={{ maxWidth: '450px', fontSize: '1.1rem' }}>
-          We couldn't find the job posting you're looking for. It may have been removed, or the link might be incorrect.
+          We couldn't find this job in the recent WhatsApp feed. It may have aged out of the list, or the link might be incorrect.
         </p>
-        <button 
-          onClick={() => navigate('/')} 
+        <button
+          onClick={() => navigate('/')}
           className="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow-sm custom-hover"
         >
           Browse Other Jobs
@@ -65,8 +65,8 @@ const JobDetails = () => {
       await toggleSaveJob(id);
       setJob({
         ...job,
-        savedBy: isSaved 
-          ? job.savedBy.filter(uId => uId !== user?._id)
+        savedBy: isSaved
+          ? job.savedBy.filter((uId) => uId !== user?._id)
           : [...(job.savedBy || []), user?._id]
       });
       toast.success(isSaved ? 'Job removed from saved list' : 'Job saved successfully');
@@ -89,16 +89,15 @@ const JobDetails = () => {
 
   return (
     <div className="container py-5 mt-3" style={{ maxWidth: '1000px' }}>
-      <button 
-        onClick={() => navigate(-1)} 
+      <button
+        onClick={() => navigate(-1)}
         className="btn btn-link text-decoration-none text-secondary d-inline-flex align-items-center mb-4 p-0 custom-hover"
       >
         <FiChevronLeft className="me-1" /> Back to jobs
       </button>
 
       <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
-        
-        <JobDetailsHeader 
+        <JobDetailsHeader
           job={job}
           isSaved={isSaved}
           isLoggedIn={isLoggedIn}
@@ -112,14 +111,13 @@ const JobDetails = () => {
           setIsDeleteModalOpen={setIsDeleteModalOpen}
         />
 
-        {/* Content Section */}
         <div className="card-body p-4 p-md-5">
           <div className="row g-5">
             <div className="col-lg-8">
               <section>
-                <h2 className="h4 fw-bold text-body mb-4">Job Description</h2>
+                <h2 className="h4 fw-bold text-body mb-4">Job details</h2>
                 <div className="text-secondary" style={{ fontSize: '1.05rem', lineHeight: '1.8' }}>
-                  <p className="whitespace-pre-line m-0">{job.description}</p>
+                  <p className="m-0" dir="auto" style={{ whiteSpace: 'pre-wrap' }}>{job.description || 'No additional description was collected for this posting.'}</p>
                 </div>
               </section>
             </div>

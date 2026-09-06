@@ -1,20 +1,52 @@
 # React Job Board Application
 
-A full-featured, production-ready Job Board Application built with React, Vite, and Bootstrap.
+A React + Vite + Bootstrap job browser. The main path is now a **personal WhatsApp job feed** for local use: list, filter, and open apply links from Yair's collector API.
+
+## How to run locally against the WhatsApp jobs API
+
+This is the supported workflow. Do not deploy this phase to Vercel or other hosting.
+
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Point the app at the collector** — copy `.env.example` to `.env` (or edit `.env`):
+   ```env
+   VITE_API_URL=http://167.233.98.192:8787
+   ```
+   `VITE_JOBS_API_URL` is an optional alias if `VITE_API_URL` is unset.
+
+3. **Start Vite**:
+   ```bash
+   npm run dev
+   ```
+
+4. Open the printed localhost URL. The home page calls `GET /api/jobs/recent?limit=200` in the browser (CORS is `*`, HTTP is fine). Cards show cleaned title, parsed company, WhatsApp group, and date. Job detail `/jobs/:id` is resolved from the recent list (there is no get-by-id API). **Apply** opens `applyUrl` in a new tab.
+
+Login, register, saved jobs, my-jobs, and recruiter/admin create/edit/delete still exist as routes but are hidden in the nav. They depend on the old webify API and are unused for this personal feed.
 
 ## 🚀 Objectives & Features
 
-This application serves two primary user personas:
-- **Job Seekers**: Browse, filter, view details, and save jobs to their personal list.
-- **Recruiters**: Create, edit, and delete their own job postings, and view applicants.
-- **Admins**: Have overarching control to edit and delete any job postings across the platform and manage user statuses.
+- **Personal feed**: browse jobs collected from WhatsApp groups.
+- **Client-side search & filters**: title / company / group text search, plus group and status dropdowns.
+- **Detail + Apply**: open the original posting (`applyUrl`, usually LinkedIn). This UI does not submit applications.
+- Older recruiter/admin flows are left in place but not wired to a new backend.
 
-### Key Features
-- **Role-Based Access Control**: Secure routing for Guests, Authenticated Users, Recruiters, and Admins.
-- **Dynamic Search & Filtering**: Real-time filtering with 300ms debounce.
-- **Premium Design**: Fully responsive, dark-mode ready UI built with Bootstrap.
-- **Form Validation**: Robust client-side validation using Formik and Yup.
-- **API Integration**: Centralized Axios instance with request interceptors for JWT auth.
+## Feed mapping
+
+Collector `GET /api/jobs/recent` returns `{ ok, jobs, source, mongo, total }`. Each job is normalized in `src/utils/whatsappJob.js`:
+
+| Collector | UI |
+|---|---|
+| `id` | `_id` / `id` (routing key) |
+| `title` | display title — strip `*`, BOM/RTL marks; if pattern is `Role / Company` and `company` is empty, split them |
+| `company` | feed company, or parsed from title, or `—` |
+| `group` | badge + filter |
+| `applyUrl` | Apply CTA (`applicationUrl` alias for older sidebar code) |
+| `status` / `approvalStatus` | detail + filter |
+| `createdAt` / `source` | date and overview |
+| location / salary / jobType | `—` or hidden so cards do not crash |
 
 ## 🛠️ Tech Stack
 
@@ -67,35 +99,19 @@ src/
 
 ## ⚙️ Environment Setup
 
-Create a `.env` file in the root directory and configure your API URL:
+See **How to run locally against the WhatsApp jobs API** above. `.env.example` is the reference.
 
 ```env
-VITE_API_URL=https://api.webify.host
+VITE_API_URL=http://167.233.98.192:8787
 ```
 
-*(See `.env.example` for reference).*
+## 🏃 Other scripts
 
-## 🏃 Build & Run Instructions
-
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Start the development server**:
-   ```bash
-   npm run dev
-   ```
-
-3. **Build for production**:
-   ```bash
-   npm run build
-   ```
-
-4. **Preview production build**:
-   ```bash
-   npm run preview
-   ```
+```bash
+npm run build
+npm run preview
+npm test
+```
 
 ---
 **Submitted by:** Yair Klausner
