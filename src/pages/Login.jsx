@@ -21,7 +21,8 @@ const Login = () => {
     onSubmit: async (values) => {
       try {
         setIsSubmitting(true);
-        const token = await loginUser(values);
+        const data = await loginUser(values);
+        const token = typeof data === 'string' ? data : data?.token;
         login(token);
         toast.success('Login successful!');
         navigate('/');

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { getAllJobs, toggleSaveJob } from '../services/jobsService';
+import { useAuth } from '../contexts/AuthContext';
 import JobCard from '../components/JobCard';
 import JobCardSkeleton from '../components/JobCardSkeleton';
 import EmptyState from '../components/EmptyState';
@@ -7,6 +8,7 @@ import { toast } from 'react-toastify';
 import { FiSearch } from 'react-icons/fi';
 
 const Home = () => {
+  const { user } = useAuth();
   const [allJobs, setAllJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -86,12 +88,12 @@ const Home = () => {
   const handleSaveJob = async (jobId) => {
     try {
       await toggleSaveJob(jobId);
-      // Optimistic update on allJobs
+      const userId = user?._id;
       setAllJobs(prevJobs => prevJobs.map(job => 
         job._id === jobId 
-          ? { ...job, savedBy: job.savedBy?.includes('currentUser') 
-              ? job.savedBy.filter(id => id !== 'currentUser') 
-              : [...(job.savedBy || []), 'currentUser'] } 
+          ? { ...job, savedBy: job.savedBy?.includes(userId) 
+              ? job.savedBy.filter(id => id !== userId) 
+              : [...(job.savedBy || []), userId] } 
           : job
       ));
       toast.success('Job saved status updated');

@@ -70,7 +70,7 @@ src/
 Create a `.env` file in the root directory and configure your API URL:
 
 ```env
-VITE_API_URL=https://api.webify.host
+VITE_API_URL=http://localhost:8181
 ```
 
 *(See `.env.example` for reference).*
