@@ -1,4 +1,4 @@
-import apiClient from './apiClient';
+import apiClient, { jobsFeedClient } from './apiClient';
 import { normalizeWhatsAppJob } from '../utils/whatsappJob';
 import { findCachedJobById, setCachedJobs } from './jobsCache';
 
@@ -17,7 +17,7 @@ const normalizeRecentResponse = (data) => {
 };
 
 export const getRecentJobs = async (params = {}) => {
-  const { data } = await apiClient.get('/api/jobs/recent', {
+  const { data } = await jobsFeedClient.get('/api/jobs/recent', {
     params: { limit: params.limit ?? DEFAULT_RECENT_LIMIT, ...params },
   });
   return normalizeRecentResponse(data);

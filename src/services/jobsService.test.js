@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import apiClient from './apiClient';
+import { jobsFeedClient } from './apiClient';
 import { getAllJobs, getJobById, getRecentJobs } from './jobsService';
 import { clearCachedJobs } from './jobsCache';
 
 vi.mock('./apiClient', () => ({
   default: {
+    get: vi.fn(),
+  },
+  jobsFeedClient: {
     get: vi.fn(),
   },
 }));
@@ -28,44 +31,44 @@ describe('jobsService', () => {
   });
 
   it('loads recent jobs from /api/jobs/recent and normalizes them', async () => {
-    apiClient.get.mockResolvedValueOnce({
+    jobsFeedClient.get.mockResolvedValueOnce({
       data: { ok: true, jobs: [sampleJob], total: 1, source: 'mongo+jobdb' },
     });
 
     const jobs = await getAllJobs({ limit: 80 });
 
-    expect(apiClient.get).toHaveBeenCalledWith('/api/jobs/recent', { params: { limit: 80 } });
+    expect(jobsFeedClient.get).toHaveBeenCalledWith('/api/jobs/recent', { params: { limit: 80 } });
     expect(jobs[0]._id).toBe('abc123');
     expect(jobs[0].title).toBe('Security Engineer');
     expect(jobs[0].company).toBe('Salt Security');
   });
 
   it('resolves job details from the in-memory recent cache', async () => {
-    apiClient.get.mockResolvedValueOnce({
+    jobsFeedClient.get.mockResolvedValueOnce({
       data: { ok: true, jobs: [sampleJob], total: 1 },
     });
 
     await getRecentJobs();
     const job = await getJobById('abc123');
 
-    expect(apiClient.get).toHaveBeenCalledTimes(1);
+    expect(jobsFeedClient.get).toHaveBeenCalledTimes(1);
     expect(job.title).toBe('Security Engineer');
     expect(job.applyUrl).toBe('https://example.com/apply');
   });
 
   it('refetches recent jobs when the id is not cached', async () => {
-    apiClient.get.mockResolvedValueOnce({
+    jobsFeedClient.get.mockResolvedValueOnce({
       data: { ok: true, jobs: [sampleJob], total: 1 },
     });
 
     const job = await getJobById('abc123');
 
-    expect(apiClient.get).toHaveBeenCalledTimes(1);
+    expect(jobsFeedClient.get).toHaveBeenCalledTimes(1);
     expect(job._id).toBe('abc123');
   });
 
   it('throws when the id is not in the recent feed', async () => {
-    apiClient.get.mockResolvedValueOnce({
+    jobsFeedClient.get.mockResolvedValueOnce({
       data: { ok: true, jobs: [sampleJob], total: 1 },
     });
 
