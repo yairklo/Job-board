@@ -1,13 +1,45 @@
 import apiClient from './apiClient';
+import { normalizeWhatsAppJob } from '../utils/whatsappJob';
+import { findCachedJobById, setCachedJobs } from './jobsCache';
+
+const DEFAULT_RECENT_LIMIT = 200;
+
+const normalizeRecentResponse = (data) => {
+  const rawJobs = Array.isArray(data) ? data : data?.jobs || data?.docs || [];
+  const jobs = rawJobs.map(normalizeWhatsAppJob);
+  setCachedJobs(jobs);
+  return {
+    jobs,
+    total: data?.total ?? jobs.length,
+    source: data?.source,
+    mongo: data?.mongo,
+  };
+};
+
+export const getRecentJobs = async (params = {}) => {
+  const { data } = await apiClient.get('/api/jobs/recent', {
+    params: { limit: params.limit ?? DEFAULT_RECENT_LIMIT, ...params },
+  });
+  return normalizeRecentResponse(data);
+};
 
 export const getAllJobs = async (params) => {
-  const { data } = await apiClient.get('/jobs', { params });
-  return data;
+  const { jobs } = await getRecentJobs(params);
+  return jobs;
 };
 
 export const getJobById = async (jobId) => {
-  const { data } = await apiClient.get(`/jobs/${jobId}`);
-  return data;
+  const cached = findCachedJobById(jobId);
+  if (cached) return cached;
+
+  const { jobs } = await getRecentJobs({ limit: DEFAULT_RECENT_LIMIT });
+  const found = jobs.find((job) => job._id === jobId || job.id === jobId);
+  if (!found) {
+    const error = new Error('Job not found');
+    error.status = 404;
+    throw error;
+  }
+  return found;
 };
 
 export const getMyJobs = async (params) => {
